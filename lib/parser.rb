@@ -3,7 +3,6 @@ require_relative "../lib/parts/repeating_part"
 require_relative "../lib/parts/wildcard_part"
 require_relative "../lib/parts/group_part"
 
-
 class Parser
   class ParseError < StandardError; end
 
@@ -14,38 +13,49 @@ class Parser
 
   def parse
     remove_slashes!
-    Regex.new(do_parse)
+    Regex.new(parse_pattern)
   end
 
   private
 
-  def do_parse
+  def parse_pattern(closing_tag=nil)
     patterns = []
 
     while @offset < @pattern.length
-      case @pattern[@offset]
-      when "."
-        current_part = parse_wildcard
-      when "("
-        current_part = parse_group
-      when ")"
+      if @pattern[@offset] == closing_tag
         @offset += 1
-        return patterns
-      else
-        current_part = parse_basic_part
+        break
       end
 
-      look_ahead = @pattern[@offset]
-      case look_ahead
-      when "+", "*"
-        patterns << repeating_part(current_part, look_ahead)
-        @offset += 1
-      else
-        patterns << current_part
-      end
+      current_part = parse_part
+      current_part = handle_repeater(current_part)
+
+      patterns << current_part
     end
 
     patterns
+  end
+
+  def parse_part
+    case @pattern[@offset]
+    when "."
+      parse_wildcard
+    when "("
+      parse_group
+    else
+      parse_basic_part
+    end
+  end
+
+  def handle_repeater(current_part)
+    lookahead = @pattern[@offset]
+    case lookahead
+    when "+", "*"
+      @offset += 1
+      repeating_part(current_part, lookahead)
+    else
+      current_part
+    end
   end
 
   def remove_slashes!
@@ -72,7 +82,7 @@ class Parser
 
   def parse_group
     @offset += 1
-    GroupPart.new(do_parse, capture: true)
+    GroupPart.new(parse_pattern(")"), capture: true)
   end
 
   def parse_basic_part
