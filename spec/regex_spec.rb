@@ -49,5 +49,17 @@ RSpec.describe Regex do
         expect(regex.match("farrr")).to be_nil
       end
     end
+
+    context "with a . wildcard pattern" do
+      let(:regex) { Regex.new([BasicPart.new("ba"), WildcardPart.new]) }
+
+      it "matches the next character in the string" do
+        expect(regex.match("baz").complete_match).to eq "baz"
+      end
+
+      it "doesn't match at the end of the string" do
+        expect(regex.match("ba")).to be_nil
+      end
+    end
   end
 end
