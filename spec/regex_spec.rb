@@ -99,5 +99,17 @@ RSpec.describe Regex do
         expect(regex.match("*aa")).to be_nil
       end
     end
+
+    context "with a simple character class" do
+      let(:regex) { Regex.parse("/[foo]+/") }
+
+      it "matches all matching characters" do
+        expect(regex.match("fofffoofofo").complete_match).to eq "fofffoofofo"
+      end
+
+      it "matches the first group of characters" do
+        expect(regex.match("lazfoofofobazfoofoo").complete_match).to eq "foofofo"
+      end
+    end
   end
 end

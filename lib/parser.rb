@@ -2,6 +2,7 @@ require_relative "../lib/parts/basic_part"
 require_relative "../lib/parts/repeating_part"
 require_relative "../lib/parts/wildcard_part"
 require_relative "../lib/parts/group_part"
+require_relative "../lib/parts/or_part"
 
 class Parser
   class ParseError < StandardError; end
@@ -42,6 +43,8 @@ class Parser
       parse_wildcard
     when "("
       parse_group
+    when "["
+      parse_character_class
     when "\\"
       @offset += 1
       parse_basic_part
@@ -93,5 +96,10 @@ class Parser
   def parse_basic_part
     @offset += 1
     BasicPart.new(@pattern[@offset - 1])
+  end
+
+  def parse_character_class
+    @offset += 1
+    OrPart.new(parse_pattern("]"))
   end
 end
