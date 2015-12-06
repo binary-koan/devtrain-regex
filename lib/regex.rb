@@ -1,5 +1,6 @@
 require_relative 'match'
 require_relative 'parser'
+require_relative 'parts/group_part'
 
 class Regex
   def self.parse(pattern)
@@ -7,31 +8,15 @@ class Regex
   end
 
   def initialize(parts)
-    @parts = parts
+    @pattern = GroupPart.new(parts, capture: false)
   end
 
   def match(string)
-    (0..string.length).each do |offset|
-      match = try_match(string, offset)
-      if match
-        return match
-      end
+    string.length.times do |offset|
+      match = @pattern.match(string, offset)
+      return match if match
     end
 
     nil
-  end
-
-  def try_match(string, offset)
-    matches = []
-    current_offset = offset
-
-    @parts.each do |part|
-      matches << part.match(string, current_offset)
-      return nil unless matches.last
-
-      current_offset += matches.last.complete_match.length
-    end
-
-    matches.inject(Match.new(offset, ""), &:merge)
   end
 end
