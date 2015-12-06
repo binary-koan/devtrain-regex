@@ -6,16 +6,17 @@ class RepeatingPart
 
   def match(string, offset)
     matches = []
+    current_offset = offset
 
-    while length = @part.match(string, offset)
-      matches << length
-      offset += length
+    while match = @part.match(string, current_offset)
+      matches << match
+      current_offset += match.complete_match.length
     end
 
     if @minimum == 0 && matches.length == 0
-      0
+      Match.new(offset)
     elsif matches.length >= @minimum
-      matches.inject(&:+)
+      matches.inject(Match.new(offset), &:merge)
     end
   end
 end

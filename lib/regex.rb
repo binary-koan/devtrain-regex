@@ -1,4 +1,4 @@
-
+require_relative 'match'
 
 class Regex
   def initialize(parts)
@@ -7,9 +7,9 @@ class Regex
 
   def match(string)
     (0..string.length).each do |offset|
-      length = try_match(string, offset)
-      if length
-        return string[offset, length]
+      match = try_match(string, offset)
+      if match
+        return match
       end
     end
 
@@ -17,15 +17,16 @@ class Regex
   end
 
   def try_match(string, offset)
-    lengths = []
+    matches = []
+    current_offset = offset
 
     @parts.each do |part|
-      lengths << part.match(string, offset)
-      return nil unless lengths.last
+      matches << part.match(string, current_offset)
+      return nil unless matches.last
 
-      offset += lengths.last
+      current_offset += matches.last.complete_match.length
     end
 
-    lengths.inject(&:+)
+    matches.inject(Match.new(offset, ""), &:merge)
   end
 end

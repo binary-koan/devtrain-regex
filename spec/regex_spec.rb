@@ -6,11 +6,11 @@ RSpec.describe Regex do
       let(:regex) { Regex.new([BasicPart.new("foo")]) }
 
       it "matches at the beginning of the string" do
-        expect(regex.match("foobar")).to eq "foo"
+        expect(regex.match("foobar").complete_match).to eq "foo"
       end
 
       it "matches in the middle of the string" do
-        expect(regex.match("barfoobaz")).to eq "foo"
+        expect(regex.match("barfoobaz").complete_match).to eq "foo"
       end
 
       it "returns nil without a match" do
@@ -22,11 +22,11 @@ RSpec.describe Regex do
       let(:regex) { Regex.new([BasicPart.new("f"), RepeatingPart.new(BasicPart.new("o"), minimum: 1)]) }
 
       it "matches when the pattern is the whole string" do
-        expect(regex.match("foo")).to eq "foo"
+        expect(regex.match("foo").complete_match).to eq "foo"
       end
 
       it "matches when it is part of the string" do
-        expect(regex.match("barfooooooobaz")).to eq "fooooooo"
+        expect(regex.match("barfooooooobaz").complete_match).to eq "fooooooo"
       end
 
       it "doesn't match zero instances" do
@@ -38,11 +38,11 @@ RSpec.describe Regex do
       let(:regex) { Regex.new([BasicPart.new("ba"), RepeatingPart.new(BasicPart.new("r"), minimum: 0)]) }
 
       it "matches when the string doesn't contain the repeating part" do
-        expect(regex.match("ba")).to eq "ba"
+        expect(regex.match("ba").complete_match).to eq "ba"
       end
 
       it "matches all instances of the repeated part" do
-        expect(regex.match("barrrrrrrrrrrr")).to eq "barrrrrrrrrrrr"
+        expect(regex.match("barrrrrrrrrrrr").complete_match).to eq "barrrrrrrrrrrr"
       end
 
       it "doesn't match if the basic part is not included" do

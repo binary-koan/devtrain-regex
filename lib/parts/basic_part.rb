@@ -5,7 +5,7 @@ class BasicPart
 
   def match(string, offset)
     if string[offset, @sequence.length] == @sequence
-      @sequence.length
+      Match.new(offset, @sequence)
     end
   end
 end
