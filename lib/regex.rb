@@ -1,6 +1,11 @@
 require_relative 'match'
+require_relative 'parser'
 
 class Regex
+  def self.parse(pattern)
+    Parser.new(pattern).parse
+  end
+
   def initialize(parts)
     @parts = parts
   end

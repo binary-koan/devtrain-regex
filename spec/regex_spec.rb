@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe Regex do
   describe "#match" do
     context "with a simple sequence of characters" do
-      let(:regex) { Regex.new([BasicPart.new("foo")]) }
+      let(:regex) { Regex.parse("/foo/") }
 
       it "matches at the beginning of the string" do
         expect(regex.match("foobar").complete_match).to eq "foo"
@@ -19,9 +19,10 @@ RSpec.describe Regex do
     end
 
     context "with a + repeating pattern" do
-      let(:regex) { Regex.new([BasicPart.new("f"), RepeatingPart.new(BasicPart.new("o"), minimum: 1)]) }
+      let(:regex) { Regex.parse("/fo+/") }
 
       it "matches when the pattern is the whole string" do
+        
         expect(regex.match("foo").complete_match).to eq "foo"
       end
 
@@ -35,7 +36,7 @@ RSpec.describe Regex do
     end
 
     context "with a * repeating pattern" do
-      let(:regex) { Regex.new([BasicPart.new("ba"), RepeatingPart.new(BasicPart.new("r"), minimum: 0)]) }
+      let(:regex) { Regex.parse("/bar*/") }
 
       it "matches when the string doesn't contain the repeating part" do
         expect(regex.match("ba").complete_match).to eq "ba"
@@ -51,7 +52,7 @@ RSpec.describe Regex do
     end
 
     context "with a . wildcard pattern" do
-      let(:regex) { Regex.new([BasicPart.new("ba"), WildcardPart.new]) }
+      let(:regex) { Regex.parse("/ba./") }
 
       it "matches the next character in the string" do
         expect(regex.match("baz").complete_match).to eq "baz"
