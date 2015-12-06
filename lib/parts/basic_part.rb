@@ -1,11 +1,11 @@
 class BasicPart
-  def initialize(sequence)
-    @sequence = sequence
+  def initialize(char)
+    @char = char
   end
 
   def match(string, offset)
-    if string[offset, @sequence.length] == @sequence
-      Match.new(offset, @sequence)
+    if string[offset] == @char
+      Match.new(offset, @char)
     end
   end
 end
