@@ -53,7 +53,7 @@ class Parser
   def handle_repeater(current_part)
     lookahead = @pattern[@offset]
     case lookahead
-    when "+", "*"
+    when "+", "*", "?"
       @offset += 1
       repeating_part(current_part, lookahead)
     else
@@ -74,7 +74,9 @@ class Parser
     when "+"
       RepeatingPart.new(part, minimum: 1)
     when "*"
-      RepeatingPart.new(part, minimum: 0)
+      RepeatingPart.new(part)
+    when "?"
+      RepeatingPart.new(part, maximum: 1)
     end
   end
 

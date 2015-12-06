@@ -51,6 +51,18 @@ RSpec.describe Regex do
       end
     end
 
+    context "with a ? pattern" do
+      let(:regex) { Regex.parse("/foo?/") }
+
+      it "matches when the character is not present" do
+        expect(regex.match("fo").complete_match).to eq "fo"
+      end
+
+      it "matches when the character is present" do
+        expect(regex.match("foo").complete_match).to eq "foo"
+      end
+    end
+
     context "with a . wildcard pattern" do
       let(:regex) { Regex.parse("/ba./") }
 
