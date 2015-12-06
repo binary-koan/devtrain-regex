@@ -78,5 +78,14 @@ RSpec.describe Regex do
         expect(regex.match("fbaazazkx").capture_groups).to eq ["baa", "za", "zk"]
       end
     end
+
+    context "with escaped special characters" do
+      let(:regex) { Regex.parse("/\\*a\\+/") }
+
+      it "treats the escaped characters as literals" do
+        expect(regex.match("*a+").complete_match).to eq "*a+"
+        expect(regex.match("*aa")).to be_nil
+      end
+    end
   end
 end

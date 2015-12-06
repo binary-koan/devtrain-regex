@@ -42,6 +42,9 @@ class Parser
       parse_wildcard
     when "("
       parse_group
+    when "\\"
+      @offset += 1
+      parse_basic_part
     else
       parse_basic_part
     end
