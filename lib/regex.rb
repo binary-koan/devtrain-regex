@@ -1,8 +1,8 @@
-require_relative "parts/basic"
+
 
 class Regex
-  def initialize(pattern)
-    @parts = [BasicPart.new(pattern)]
+  def initialize(parts)
+    @parts = parts
   end
 
   def match(string)
@@ -17,15 +17,15 @@ class Regex
   end
 
   def try_match(string, offset)
-    length = 0
+    lengths = []
 
     @parts.each do |part|
-      length = part.match(string, offset)
-      return nil unless length
+      lengths << part.match(string, offset)
+      return nil unless lengths.last
 
-      offset += length
+      offset += lengths.last
     end
 
-    length
+    lengths.inject(&:+)
   end
 end
