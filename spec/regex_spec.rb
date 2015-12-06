@@ -69,7 +69,14 @@ RSpec.describe Regex do
       it "stores a match in the list of capture groups" do
         expect(regex.match("foo").capture_groups).to contain_exactly "o"
       end
+    end
 
+    context "with a complex capture group" do
+      let(:regex) { Regex.parse("/f(ba+)(z.)*/") }
+
+      it "adds all matches inside the capture group" do
+        expect(regex.match("fbaazazkx").capture_groups).to eq ["baa", "za", "zk"]
+      end
     end
   end
 end

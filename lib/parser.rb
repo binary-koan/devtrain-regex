@@ -29,6 +29,7 @@ class Parser
       when "("
         current_part = parse_group
       when ")"
+        @offset += 1
         return patterns
       else
         current_part = parse_basic_part
