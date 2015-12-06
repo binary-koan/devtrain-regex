@@ -22,7 +22,7 @@ RSpec.describe Regex do
       let(:regex) { Regex.parse("/fo+/") }
 
       it "matches when the pattern is the whole string" do
-        
+
         expect(regex.match("foo").complete_match).to eq "foo"
       end
 
@@ -61,6 +61,15 @@ RSpec.describe Regex do
       it "doesn't match at the end of the string" do
         expect(regex.match("ba")).to be_nil
       end
+    end
+
+    context "with a basic capture group" do
+      let(:regex) { Regex.parse("/fo(o)/") }
+
+      it "stores a match in the list of capture groups" do
+        expect(regex.match("foo").capture_groups).to contain_exactly "o"
+      end
+
     end
   end
 end
