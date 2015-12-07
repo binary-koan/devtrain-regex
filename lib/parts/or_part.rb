@@ -4,9 +4,9 @@ class OrPart
   end
 
   def match(string, offset)
-    @parts.map do |part|
-      part.match(string, offset)
-    end.detect { |match| match != nil }
+    @parts
+      .map { |part| part.match(string, offset) }
+      .detect { |match| match != nil }
   end
 
   def to_s

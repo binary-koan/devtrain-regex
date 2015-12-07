@@ -1,8 +1,6 @@
 class WildcardPart
   def match(string, offset)
-    if string[offset]
-      return Match.new(offset, string[offset])
-    end
+    Match.new(offset, string[offset]) if string[offset]
   end
 
   def to_s

@@ -1,19 +1,10 @@
 class RepeatingPart
   def initialize(part, minimum: 0, maximum: nil)
-    @part = part
-    @minimum = minimum
-    @maximum = maximum
+    @part, @minimum, @maximum = part, minimum, maximum
   end
 
   def match(string, offset)
-    matches = []
-    current_offset = offset
-
-    while (match = @part.match(string, current_offset))
-      break if @maximum && matches.length == @maximum
-      matches << match
-      current_offset += match.complete_match.length
-    end
+    matches = find_matches(string, offset)
 
     if @minimum == 0 && matches.length == 0
       Match.new(offset)
@@ -24,5 +15,19 @@ class RepeatingPart
 
   def to_s
     "#{@part}{#{@minimum},#{@maximum}}"
+  end
+
+  private
+
+  def find_matches(string, offset)
+    matches = []
+
+    while (match = @part.match(string, offset))
+      break if @maximum && matches.length == @maximum
+      matches << match
+      offset += match.complete_match.length
+    end
+
+    matches
   end
 end

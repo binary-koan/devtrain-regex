@@ -7,7 +7,7 @@ puts "Your regex was compiled to: #{regex}"
 
 match = regex.match(ARGV[0])
 if match
-  puts "Match at index #{match.offset}!"
+  puts "Match at index #{match.index}!"
   puts "  #{match.complete_match}"
   puts "Capture groups: #{match.capture_groups}"
 else

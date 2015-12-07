@@ -5,17 +5,15 @@ class GroupPart
   end
 
   def match(string, offset)
-    matches = []
     current_offset = offset
 
-    @parts.each do |part|
-      matches << part.match(string, current_offset)
-      return nil unless matches.last
+    match = @parts.inject(Match.new(offset)) do |match, part|
+      current_match = part.match(string, match.end_index)
+      return nil unless current_match
 
-      current_offset += matches.last.complete_match.length
+      match.merge(current_match)
     end
 
-    match = matches.inject(Match.new(offset, ""), &:merge)
     match.capture_groups << match.complete_match if @capture
     match
   end
