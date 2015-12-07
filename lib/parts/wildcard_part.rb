@@ -4,4 +4,8 @@ class WildcardPart
       return Match.new(offset, string[offset])
     end
   end
+
+  def to_s
+    "."
+  end
 end

@@ -19,4 +19,8 @@ class Regex
 
     nil
   end
+
+  def to_s
+    "/#{@pattern}/"
+  end
 end

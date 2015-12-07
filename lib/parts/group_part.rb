@@ -19,4 +19,9 @@ class GroupPart
     match.capture_groups << match.complete_match if @capture
     match
   end
+
+  def to_s
+    start = @capture ? "(" : "(?:"
+    "#{start}#{@parts.join("")})"
+  end
 end

@@ -4,9 +4,7 @@ class BasicPart
   end
 
   def match(string, offset)
-    if string[offset] == @char
-      Match.new(offset, @char)
-    end
+    Match.new(offset, @char) if string[offset] == @char
   end
 
   def to_s

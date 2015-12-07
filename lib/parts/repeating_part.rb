@@ -21,4 +21,8 @@ class RepeatingPart
       matches.inject(Match.new(offset), &:merge)
     end
   end
+
+  def to_s
+    "#{@part}{#{@minimum},#{@maximum}}"
+  end
 end
