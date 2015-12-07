@@ -2,7 +2,7 @@ require_relative "../lib/parts/basic_part"
 require_relative "../lib/parts/repeating_part"
 require_relative "../lib/parts/wildcard_part"
 require_relative "../lib/parts/group_part"
-require_relative "../lib/parts/or_part"
+require_relative "../lib/parts/character_class_part"
 
 class Parser
   class ParseError < StandardError; end
@@ -58,17 +58,17 @@ class Parser
       parts += parse_character_class_part(char, parts)
     end
 
-    or_part(parts)
+    character_class_part(parts)
   end
 
   def parse_character_class_part(char, existing_parts)
     case char
     when "\\"
-      [basic_part(@pattern.getc)]
+      [@pattern.getc]
     when "-"
       expand_inner_range(existing_parts.last, @pattern.getc)
     else
-      [basic_part(char)]
+      [char]
     end
   end
 
@@ -92,7 +92,7 @@ class Parser
     fail ParseError, "invalid character class range" unless from && to
 
     from_char = from.to_s.next
-    (from_char..to.to_s).map { |char| BasicPart.new(char) }
+    (from_char..to.to_s).to_a
   end
 
   def remove_slashes(pattern)
@@ -119,7 +119,7 @@ class Parser
     BasicPart.new(char)
   end
 
-  def or_part(parts)
-    OrPart.new(parts)
+  def character_class_part(parts)
+    CharacterClassPart.new(parts)
   end
 end
