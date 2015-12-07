@@ -89,6 +89,9 @@ class Parser
       repeating_part(current_part)
     when "?"
       repeating_part(current_part, maximum: 1)
+    when "{"
+      min, max = parse_range
+      repeating_part(current_part, minimum: min, maximum: max)
     else
       @pattern.ungetc(lookahead)
       current_part
@@ -100,6 +103,35 @@ class Parser
 
     from_char = from.to_s.next
     (from_char..to.to_s).to_a
+  end
+
+  def parse_range
+    min = parse_number
+    next_char = @pattern.getc
+    range = if next_char == ","
+      max = parse_number
+      [min || 0, max]
+    else
+      @pattern.ungetc(next_char)
+      [min, min]
+    end
+
+    fail ParseError, "invalid range" unless @pattern.getc == "}"
+
+    range
+  end
+
+  def parse_number
+    string = ""
+    loop do
+      char = @pattern.getc
+      if ("0".."9").include?(char)
+        string += char
+      else
+        @pattern.ungetc(char)
+        return string.empty? ? nil : string.to_i
+      end
+    end
   end
 
   def remove_slashes(pattern)

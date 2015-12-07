@@ -151,5 +151,69 @@ RSpec.describe Regex do
         expect(regex.match("abfdas543FADabnf").complete_match).to eq "543FAD"
       end
     end
+
+    context "with an exact range" do
+      let(:regex) { Regex.parse("/a{5}/") }
+
+      it "matches when the range is exactly meet" do
+        expect(regex.match("terggaaaaagfd5s").complete_match).to eq "a" * 5
+      end
+
+      it "doesn't match when there is one to few letters" do
+        expect(regex.match("terggaaaagfd5s")).to be_nil
+      end
+
+      it "doesn't match too many letters" do
+        expect(regex.match("terggaaaaaagfd5s").complete_match).to eq "a" * 5
+      end
+    end
+
+    context "with a lower bounded range" do
+      let(:regex) { Regex.parse("/a{3,}/") }
+
+      it "doesn't match when there is one to few letters" do
+        expect(regex.match("terggaagfd5s")).to be_nil
+      end
+
+      it "matches as many letters as possible" do
+        expect(regex.match("terggaaaaaaaaaagfd5s").complete_match).to eq "a" * 10
+      end
+    end
+
+    context "with an upper bounded range" do
+      let(:regex) { Regex.parse("/a{,5}/") }
+
+      it "doesn't match too many letters" do
+        expect(regex.match("aaaaaagfd5s").complete_match).to eq "a" * 5
+      end
+
+      it "matches fewer than the maximum number of letters" do
+        expect(regex.match("aaagfd5s").complete_match).to eq "a" * 3
+      end
+    end
+
+    context "with a bounded range" do
+      let(:regex) { Regex.parse("/a{2,5}/") }
+
+      it "doesn't match too many letters" do
+        expect(regex.match("aaaaaagfd5s").complete_match).to eq "a" * 5
+      end
+
+      it "doesn't match too few letters" do
+        expect(regex.match("agfd5s")).to be_nil
+      end
+
+      it "matches the minimum number of letters" do
+        expect(regex.match("aagfd5s").complete_match).to eq "a" * 2
+      end
+
+      it "matches between the minimum and maximum of letters" do
+        expect(regex.match("aaagfd5s").complete_match).to eq "a" * 3
+      end
+
+      it "matches the maximum number of letters" do
+        expect(regex.match("aaaaagfd5s").complete_match).to eq "a" * 5
+      end
+    end
   end
 end
