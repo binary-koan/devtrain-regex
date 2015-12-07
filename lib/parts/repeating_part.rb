@@ -1,5 +1,5 @@
 class RepeatingPart
-  def initialize(part, minimum: 0, maximum: Float::INFINITY)
+  def initialize(part, minimum: 0, maximum: nil)
     @part = part
     @minimum = minimum
     @maximum = maximum
@@ -10,7 +10,7 @@ class RepeatingPart
     current_offset = offset
 
     while (match = @part.match(string, current_offset))
-      break if matches.length == @maximum
+      break if @maximum && matches.length == @maximum
       matches << match
       current_offset += match.complete_match.length
     end

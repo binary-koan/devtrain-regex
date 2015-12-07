@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+require_relative "../lib/regex"
+
+regex = Regex.parse(ARGV[1])
+puts "Your regex was compiled to: #{regex}"
+
+match = regex.match(ARGV[0])
+if match
+  puts "Match at index #{match.offset}!"
+  puts "  #{match.complete_match}"
+  puts "Capture groups: #{match.capture_groups}"
+else
+  puts "Can't find a match ..."
+end
