@@ -8,12 +8,10 @@ class Parser
   class ParseError < StandardError; end
 
   def initialize(pattern)
-    @pattern = pattern
-    @offset = 0
+    @pattern = StringIO.new(remove_slashes(pattern))
   end
 
   def parse
-    remove_slashes!
     Regex.new(parse_pattern)
   end
 
@@ -22,13 +20,11 @@ class Parser
   def parse_pattern(closing_tag=nil)
     patterns = []
 
-    while @offset < @pattern.length
-      if @pattern[@offset] == closing_tag
-        @offset += 1
-        break
-      end
+    while !@pattern.eof?
+      current_char = @pattern.getc
+      break if current_char == closing_tag
 
-      current_part = parse_part
+      current_part = parse_part(current_char)
       current_part = handle_repeater(current_part)
 
       patterns << current_part
@@ -37,8 +33,8 @@ class Parser
     patterns
   end
 
-  def parse_part
-    case @pattern[@offset]
+  def parse_part(char)
+    case char
     when "."
       parse_wildcard
     when "("
@@ -46,29 +42,21 @@ class Parser
     when "["
       parse_character_class
     when "\\"
-      @offset += 1
-      parse_basic_part
+      parse_basic_part(@pattern.getc)
     else
-      parse_basic_part
+      parse_basic_part(char)
     end
   end
 
   def handle_repeater(current_part)
-    lookahead = @pattern[@offset]
+    lookahead = @pattern.getc
+
     case lookahead
     when "+", "*", "?"
-      @offset += 1
       repeating_part(current_part, lookahead)
     else
+      @pattern.ungetc(lookahead)
       current_part
-    end
-  end
-
-  def remove_slashes!
-    if @pattern[0] != '/' || @pattern[-1] != '/'
-      fail ParseError, "Pattern must be surrounded by slashes"
-    else
-      @pattern = @pattern[1..-2]
     end
   end
 
@@ -84,37 +72,34 @@ class Parser
   end
 
   def parse_wildcard
-    @offset += 1
     WildcardPart.new
   end
 
   def parse_group
-    @offset += 1
     GroupPart.new(parse_pattern(")"), capture: true)
   end
 
-  def parse_basic_part
-    @offset += 1
-    BasicPart.new(@pattern[@offset - 1])
+  def parse_basic_part(char)
+    BasicPart.new(char)
   end
 
   def parse_character_class
-    @offset += 1
     patterns = []
 
-    until @pattern[@offset] == "]"
-      if @pattern[@offset] == "\\"
-        @offset += 1
-        patterns << parse_basic_part
-      elsif @pattern[@offset] == "-"
-        patterns += expand_inner_range(@pattern[@offset - 1], @pattern[@offset + 1])
-        @offset += 1
+    loop do
+      char = @pattern.getc
+      case char
+      when "]"
+        break
+      when "\\"
+        patterns << parse_basic_part(@pattern.getc)
+      when "-"
+        patterns += expand_inner_range(patterns.last, @pattern.getc)
       else
-        patterns << parse_basic_part
+        patterns << parse_basic_part(char)
       end
     end
 
-    @offset += 1
     OrPart.new(patterns)
   end
 
@@ -122,6 +107,14 @@ class Parser
     fail ParseError, "invalid character class range" unless from && to
 
     from_char = from.to_s.next
-    (from_char...to.to_s).map { |char| BasicPart.new(char) }
+    (from_char..to.to_s).map { |char| BasicPart.new(char) }
+  end
+
+  def remove_slashes(pattern)
+    unless pattern[0] == '/' && pattern[-1] == '/'
+      fail ParseError, "Pattern must be surrounded by slashes"
+    end
+
+    pattern[1..-2]
   end
 end
