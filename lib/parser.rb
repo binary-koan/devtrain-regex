@@ -51,14 +51,21 @@ class Parser
   def parse_character_class
     parts = []
 
-    loop do
+    char = @pattern.getc
+    if char == "^"
+      negate = true
       char = @pattern.getc
+    end
+
+    loop do
       break if char == "]"
 
       parts += parse_character_class_part(char, parts)
+
+      char = @pattern.getc
     end
 
-    character_class_part(parts)
+    character_class_part(parts, negate: negate)
   end
 
   def parse_character_class_part(char, existing_parts)
@@ -119,7 +126,7 @@ class Parser
     BasicPart.new(char)
   end
 
-  def character_class_part(parts)
-    CharacterClassPart.new(parts)
+  def character_class_part(parts, **options)
+    CharacterClassPart.new(parts, **options)
   end
 end

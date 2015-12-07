@@ -139,5 +139,17 @@ RSpec.describe Regex do
         expect(regex.match("-]]]--\\").complete_match).to eq "-]]]--\\"
       end
     end
+
+    context "with a negated character class" do
+      let(:regex) { Regex.parse("/[^a-z]+/") }
+
+      it "matches characters not in the class" do
+        expect(regex.match("52423").complete_match).to eq "52423"
+      end
+
+      it "doesn't match characters in the class" do
+        expect(regex.match("abfdas543FADabnf").complete_match).to eq "543FAD"
+      end
+    end
   end
 end
