@@ -127,5 +127,17 @@ RSpec.describe Regex do
         expect(regex.match("14afdeqf6184qq13a0daq").complete_match).to eq "14afdeqf6184qq13a0daq"
       end
     end
+
+    context "with special characters in a character class" do
+      let(:regex) { Regex.parse("/[*.*+?a-z\\-\\]\\\\]+/") }
+
+      it "treats the special characters as basic parts" do
+        expect(regex.match("**.+afsdyth*fas.?").complete_match).to eq "**.+afsdyth*fas.?"
+      end
+
+      it "escapes special characters with backslashes" do
+        expect(regex.match("-]]]--\\").complete_match).to eq "-]]]--\\"
+      end
+    end
   end
 end
