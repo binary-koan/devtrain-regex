@@ -215,5 +215,46 @@ RSpec.describe Regex do
         expect(regex.match("aaaaagfd5s").complete_match).to eq "a" * 5
       end
     end
+
+    context "with special character classes" do
+      context "matching space and non-space characters" do
+        let(:regex) { Regex.parse("/(\\s+)(\\S+)/") }
+        let(:match) { regex.match(" \n\t\n   3qw...") }
+
+        it "matches space characters with \\s" do
+          expect(match.capture_groups[0]).to eq " \n\t\n   "
+        end
+
+        it "matches non-space characters with \\S" do
+          expect(match.capture_groups[1]).to eq "3qw..."
+        end
+      end
+
+      context "matching digit and non-digit characters" do
+        let(:regex) { Regex.parse("/(\\d+)(\\D+)/") }
+        let(:match) { regex.match("3409583qw...") }
+
+        it "matches digit characters with \\d" do
+          expect(match.capture_groups[0]).to eq "3409583"
+        end
+
+        it "matches non-digit characters with \\D" do
+          expect(match.capture_groups[1]).to eq "qw..."
+        end
+      end
+
+      context "matching word and non-word characters" do
+        let(:regex) { Regex.parse("/(\\w+)(\\W+)/") }
+        let(:match) { regex.match("sdaf_3qw...$") }
+
+        it "matches word characters with \\w" do
+          expect(match.capture_groups[0]).to eq "sdaf_3qw"
+        end
+
+        it "matches non-word characters with \\W" do
+          expect(match.capture_groups[1]).to eq "...$"
+        end
+      end
+    end
   end
 end

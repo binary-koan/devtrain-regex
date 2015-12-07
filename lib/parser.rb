@@ -42,7 +42,23 @@ class Parser
     when "."
       wildcard_part
     when "\\"
-      basic_part(@pattern.getc)
+      parse_escaped_char(@pattern.getc)
+    else
+      basic_part(char)
+    end
+  end
+
+  def parse_escaped_char(char)
+    case char
+    when "s", "S"
+      character_class_part([" ", "\t", "\n"], negate: char == "S")
+    when "d", "D"
+      character_class_part(("0".."9").to_a, negate: char == "D")
+    when "w", "W"
+      character_class_part(
+        ("A".."z").to_a + ("0".."9").to_a + ["_"],
+        negate: char == "W"
+      )
     else
       basic_part(char)
     end
@@ -150,8 +166,8 @@ class Parser
     BasicPart.new(char)
   end
 
-  def character_class_part(parts, **options)
-    CharacterClassPart.new(parts, **options)
+  def character_class_part(chars, **options)
+    CharacterClassPart.new(chars, **options)
   end
 
   def read_while
