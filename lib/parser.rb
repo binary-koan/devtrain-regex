@@ -106,32 +106,24 @@ class Parser
   end
 
   def parse_range
-    min = parse_number
+    min = parse_number || 0
     next_char = @pattern.getc
-    range = if next_char == ","
+
+    if next_char == ","
       max = parse_number
-      [min || 0, max]
+      next_char = @pattern.getc
     else
-      @pattern.ungetc(next_char)
-      [min, min]
+      max = min
     end
 
-    fail ParseError, "invalid range" unless @pattern.getc == "}"
+    fail ParseError, "invalid range" unless next_char == "}"
 
-    range
+    [min, max]
   end
 
   def parse_number
-    string = ""
-    loop do
-      char = @pattern.getc
-      if ("0".."9").include?(char)
-        string += char
-      else
-        @pattern.ungetc(char)
-        return string.empty? ? nil : string.to_i
-      end
-    end
+    string = read_while { |char| ("0".."9").include?(char) }
+    string.empty? ? nil : string.to_i
   end
 
   def remove_slashes(pattern)
@@ -160,5 +152,17 @@ class Parser
 
   def character_class_part(parts, **options)
     CharacterClassPart.new(parts, **options)
+  end
+
+  def read_while
+    string = ""
+
+    loop do
+      string += @pattern.getc
+      break if !yield(string[-1])
+    end
+
+    @pattern.ungetc(string[-1])
+    string[0..-2]
   end
 end

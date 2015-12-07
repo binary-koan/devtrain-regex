@@ -11,7 +11,7 @@ class CharacterClassPart
   end
 
   def to_s
-    "[#{@parts.join("")}]"
+    "[#{"^" if @negate}#{@parts.join("")}]"
   end
 
   private
