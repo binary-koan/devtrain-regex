@@ -8,4 +8,8 @@ class BasicPart
       Match.new(offset, @char)
     end
   end
+
+  def to_s
+    @char
+  end
 end

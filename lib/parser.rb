@@ -100,6 +100,22 @@ class Parser
 
   def parse_character_class
     @offset += 1
-    OrPart.new(parse_pattern("]"))
+    patterns = parse_pattern("]")
+
+    patterns = patterns.flat_map.with_index do |pattern, i|
+      if pattern.to_s == "-"
+        expand_inner_range(patterns[i - 1], patterns[i + 1])
+      else
+        pattern
+      end
+    end
+    OrPart.new(patterns)
+  end
+
+  def expand_inner_range(from, to)
+    fail ParseError, "invalid character class range" unless from && to
+    
+    from_char = from.to_s.next
+    (from_char...to.to_s).map { |char| BasicPart.new(char) }
   end
 end

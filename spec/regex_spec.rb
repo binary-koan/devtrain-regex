@@ -111,5 +111,21 @@ RSpec.describe Regex do
         expect(regex.match("lazfoofofobazfoofoo").complete_match).to eq "foofofo"
       end
     end
+
+    context "with a complex character class" do
+      let(:regex) { Regex.parse("/[a-f0-9q]+/") }
+
+      it "matches characters inside the ranges" do
+        expect(regex.match("1653bcde1be23c4de5678").complete_match).to eq "1653bcde1be23c4de5678"
+      end
+
+      it "matches characters at the start and end of ranges" do
+        expect(regex.match("a752fedf79214fecd4890").complete_match).to eq "a752fedf79214fecd4890"
+      end
+
+      it "matches characters outside of the ranges" do
+        expect(regex.match("14afdeqf6184qq13a0daq").complete_match).to eq "14afdeqf6184qq13a0daq"
+      end
+    end
   end
 end
