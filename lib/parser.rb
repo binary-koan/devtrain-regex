@@ -35,16 +35,40 @@ class Parser
 
   def parse_part(char)
     case char
-    when "."
-      parse_wildcard
-    when "("
-      parse_group
     when "["
       parse_character_class
+    when "("
+      group_part(parse_pattern(")"), capture: true)
+    when "."
+      wildcard_part
     when "\\"
-      parse_basic_part(@pattern.getc)
+      basic_part(@pattern.getc)
     else
-      parse_basic_part(char)
+      basic_part(char)
+    end
+  end
+
+  def parse_character_class
+    parts = []
+
+    loop do
+      char = @pattern.getc
+      break if char == "]"
+
+      parts += parse_character_class_part(char, parts)
+    end
+
+    or_part(parts)
+  end
+
+  def parse_character_class_part(char, existing_parts)
+    case char
+    when "\\"
+      [basic_part(@pattern.getc)]
+    when "-"
+      expand_inner_range(existing_parts.last, @pattern.getc)
+    else
+      [basic_part(char)]
     end
   end
 
@@ -52,55 +76,16 @@ class Parser
     lookahead = @pattern.getc
 
     case lookahead
-    when "+", "*", "?"
-      repeating_part(current_part, lookahead)
+    when "+"
+      repeating_part(current_part, minimum: 1)
+    when "*"
+      repeating_part(current_part)
+    when "?"
+      repeating_part(current_part, maximum: 1)
     else
       @pattern.ungetc(lookahead)
       current_part
     end
-  end
-
-  def repeating_part(part, repeater_type)
-    case repeater_type
-    when "+"
-      RepeatingPart.new(part, minimum: 1)
-    when "*"
-      RepeatingPart.new(part)
-    when "?"
-      RepeatingPart.new(part, maximum: 1)
-    end
-  end
-
-  def parse_wildcard
-    WildcardPart.new
-  end
-
-  def parse_group
-    GroupPart.new(parse_pattern(")"), capture: true)
-  end
-
-  def parse_basic_part(char)
-    BasicPart.new(char)
-  end
-
-  def parse_character_class
-    patterns = []
-
-    loop do
-      char = @pattern.getc
-      case char
-      when "]"
-        break
-      when "\\"
-        patterns << parse_basic_part(@pattern.getc)
-      when "-"
-        patterns += expand_inner_range(patterns.last, @pattern.getc)
-      else
-        patterns << parse_basic_part(char)
-      end
-    end
-
-    OrPart.new(patterns)
   end
 
   def expand_inner_range(from, to)
@@ -116,5 +101,25 @@ class Parser
     end
 
     pattern[1..-2]
+  end
+
+  def repeating_part(part, **options)
+    RepeatingPart.new(part, **options)
+  end
+
+  def wildcard_part
+    WildcardPart.new
+  end
+
+  def group_part(parts, **options)
+    GroupPart.new(parts, **options)
+  end
+
+  def basic_part(char)
+    BasicPart.new(char)
+  end
+
+  def or_part(parts)
+    OrPart.new(parts)
   end
 end
